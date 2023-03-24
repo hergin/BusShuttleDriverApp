@@ -169,33 +169,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     }
   }
 
-  populateStopsDropdown(): void {
-    this.dropdownDisabled = true;
-    this.log.stop = 'Select a stop';
-    this.stopDropdown = [];
-
-    // This actually handles putting the data in the stopdropdown to display to the user.
-    this.dropdownsService.getAllStops(this.selectedLoop.id)
-      .subscribe(
-        (data: Stop) => {
-          // this.stopDropdown.push(new Stop(null, 'Select a Stop'));
-          // tslint:disable-next-line:forin We know this already works.
-          for (const x in data.data) {
-            this.stopDropdown.push(new Stop(data.data[x].id, data.data[x].stops));
-          }
-          console.log('Populated the Stops Dropdown');
-
-          this.stopDropdownState = true;
-          this.dropdownDisabled = false;
-          this.errorMessageState = false;
-        },
-        (error: any) => {
-          this.router.navigateByUrl('/configure');
-          this.showErrorMessage('Could not get stops. Select a loop or try refreshing the page.');
-        }
-      );
-  }
-
   populateStopsDropdown2(): void {
     this.dropdownDisabled = true;
     this.log.stop = 'Select a stop';

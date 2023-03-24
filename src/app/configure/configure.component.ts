@@ -87,7 +87,9 @@ export class ConfigureComponent implements OnInit {
     this.logService.currentSyncCount.subscribe(passedCount => this.syncingCount = passedCount);
     this.dropdownsService.currentBusNumber.subscribe(passedValue => this.selectedBus = passedValue);
     this.dropdownsService.currentDriver.subscribe(passedValue => this.selectedDriver = passedValue);
-    this.dropdownsService.currentLoop.subscribe(passedValue => this.selectedLoop = passedValue);
+    this.dropdownsService.currentLoop.subscribe(passedValue => {
+      this.selectedLoop = passedValue;
+      this.getStopsFromDropdownService();});
     this.dropdownsService.currentBusDropdown.subscribe(passedValue => this.busDropdown = passedValue);
     this.dropdownsService.currentDriverDropdown.subscribe(passedValue => this.driverDropdown = passedValue);
     this.dropdownsService.currentLoopDropdown.subscribe(passedValue => this.loopsDropdown = passedValue);
@@ -130,20 +132,14 @@ export class ConfigureComponent implements OnInit {
   }
 
   validateStartButton() {
-    if (!this.onlineOffline) {
-      this.errMessage = 'Oops! There is no internet connection.';
+    if (this.selectedDriver.name === 'Select your Name' || this.selectedBus.name === 'Select a Bus'
+      || this.selectedDriver.name === '' || this.selectedDriver.name === undefined || this.selectedDriver.name === null
+      || this.selectedLoop.name === 'Select a loop' || this.selectedLoop.name === '' || this.selectedLoop.name === undefined
+      || this.selectedBus.name === '' || this.selectedBus.name === undefined || this.dropdownsService.stops.length === 0){
+      this.errorMessage = 'Oops! Select all choices above.';        
+      this.errorMessageState = true;
     } else {
-
-      if (this.selectedDriver.name === 'Select your Name' || this.selectedBus.name === 'Select a Bus'
-        || this.selectedDriver.name === '' || this.selectedDriver.name === undefined || this.selectedDriver.name === null
-        || this.selectedLoop.name === 'Select a loop' || this.selectedLoop.name === '' || this.selectedLoop.name === undefined
-        || this.selectedBus.name === '' || this.selectedBus.name === undefined) {
-        this.errorMessage = 'Oops! Select all choices above.';
-        this.errorMessageState = true;
-      } else {
-        this.getStopsFromDropdownService();
-        this.router.navigate(['/pre-inspection']);
-      }
+      this.router.navigate(['/pre-inspection']);
     }
 
   }
