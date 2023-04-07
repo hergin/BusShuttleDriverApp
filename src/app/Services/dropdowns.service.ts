@@ -13,6 +13,7 @@ import { User } from '../Models/user';
 export class DropdownsService {
   baseUrl: string;
   stops = [];
+  allStops = [];
 
   // These behavior subjects communicate the data between components.
   // When one is updated, it's reflected in all places it's used.
@@ -66,6 +67,16 @@ export class DropdownsService {
 
   getAllStops(selectedLoop: string) {
     return this.http.get(this.baseUrl + '/getStops.php?searchTerm=' + selectedLoop)
+      .pipe(
+        retryWhen(this.generateRetryStrategy()({
+          scalingDuration: 1000,
+          excludedStatusCodes: [500]
+        })),
+        catchError(this.handleError));
+  }
+
+  getEveryStops() {
+    return this.http.get(this.baseUrl + '/getAllStops.php')
       .pipe(
         retryWhen(this.generateRetryStrategy()({
           scalingDuration: 1000,

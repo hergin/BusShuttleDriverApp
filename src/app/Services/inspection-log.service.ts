@@ -29,11 +29,10 @@ export class InspectionLogService {
 
   constructor(private http: HttpClient, private inspecService: InspectionService) {
     const inspectionLogs: InspectionLog[] = JSON.parse(localStorage.getItem('inspectionLogs'));
-  }
+  } 
 
   storeLogsLocally(inspectionLog: InspectionLog) {
     this.inspectionToSend.push(inspectionLog);
-    localStorage.setItem('inspectionLogs', JSON.stringify(this.inspectionToSend));
   }
 
   store(inspectionLog: InspectionLog): Observable<InspectionLog> {

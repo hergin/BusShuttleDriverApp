@@ -79,6 +79,9 @@ export class PreInspectionComponent implements OnInit {
 
   ngOnInit() {
     this.preItems = this.inspectionService.preItems;
+    for (let i = 0; i < this.preItems.length; i++){
+      this.preItems[i].state = false;
+    }
   }
 
   validateStartButton() {
@@ -99,13 +102,9 @@ export class PreInspectionComponent implements OnInit {
           this.inspectionService.inspectionLog.driver = this.inspectionService.selectedDriver.id;
           this.inspectionService.inspectionLog.busNumber = this.inspectionService.selectedBus.id;
           this.inspectionService.inspectionLog.loop = this.inspectionService.selectedLoop.id;
-          this.createString();
           this.inspectionService.inspectionLog.startingMileage = this.startMileage;
           this.inspectionService.inspectionLog.beginningHours = this.startHours;
           this.inspectionService.inspectionLog.preInspectionComment = this.preComment;
-
-          const copy = { ...this.inspectionService.inspectionLog }; // Creating a copy of the member 'log'.
-          this.inspectionService.storeLogsLocally(copy);
 
           this.router.navigate(['/form']);
           // Subscribing to the timer. If undo pressed, we unsubscribe.

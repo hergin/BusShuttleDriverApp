@@ -54,6 +54,9 @@ export class PostInspectionComponent implements OnInit {
 
   ngOnInit() {
     this.postItems = this.inspectionService.postItems;
+    for (let i = 0; i < this.postItems.length; i++){
+      this.postItems[i].state = false;
+    }
     this.connectionService.createOnline$().subscribe(isOnline => this.onlineOffline = isOnline);
   }
 
@@ -89,11 +92,6 @@ export class PostInspectionComponent implements OnInit {
 }
 
   submitLog(): void {
-
-      if (!this.onlineOffline) {
-        this.errMessage = 'Oops! There is no internet connection.';
-      } else {
-
         if (this.validateMileage() || this.validateHours() ) {
           if (this.validateMileage()) {
             this.errorMessageState = true;
@@ -103,29 +101,22 @@ export class PostInspectionComponent implements OnInit {
           }
         } else {
 
-            JSON.parse(localStorage.getItem('inspectionLogs'));
-            this.createString();
             this.inspectionService.inspectionLog.endingMileage = this.endMileage;
             this.inspectionService.inspectionLog.endingHours = this.endingHours;
             this.inspectionService.inspectionLog.postInspectionComment = this.postComment;
-
-            const copy = { ...this.inspectionService.inspectionLog }; // Creating a copy of the member 'log'.
+            let copy = JSON.parse(JSON.stringify(this.inspectionService.inspectionLog));
             this.inspectionService.storeLogsLocally(copy);
-            const aarayLastItem = this.inspectionService.inspectionToSend.length - 1;
-            const inspectionLog = this.inspectionService.inspectionToSend[aarayLastItem];
-            this.inspectionService.store(inspectionLog)
-                    .subscribe((success) => {
-                    localStorage.setItem('inspectionLogs', JSON.stringify(this.inspectionService.inspectionLog ));
-                    });
-            this.inspectionService.inspectionToSend = [];
-            this.inspectionService.allItems = [];
-            this.inspectionService.preItems = [];
-            this.inspectionService.postItems = [];
+            if (this.onlineOffline){
+              for (let k = this.inspectionService.inspectionToSend.length - 1; k >= 0; k--){
+                this.inspectionService.store(this.inspectionService.inspectionToSend[k])
+                              .subscribe((success) => {   console.log("Sent Inspection")  
+                });
+              }
+              this.inspectionService.inspectionToSend = [];
+            }
             this.router.navigate(['/configure']);
             // Subscribing to the timer. If undo pressed, we unsubscribe.
-      }
     }
-
   }
 
   validateMileage(): boolean {

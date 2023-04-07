@@ -14,6 +14,7 @@ import { InspectionLogService } from './../Services/inspection-log.service';
 import { InspectionService } from './../Services/inspection.service';
 import { Stop } from '../Models/stop';
 import { ConnectionService } from './../Services/connection.service';
+import { allStops } from '../Models/allStops';
 
 @Component({
   selector: 'app-configure',
@@ -46,6 +47,7 @@ export class ConfigureComponent implements OnInit {
   selectedBus: Bus;
   selectedDriver: User;
   selectedLoop: Loop;
+  selectedStop: allStops;
 
   errorMessageState = false;
   busDropdownState = true;
@@ -89,19 +91,13 @@ export class ConfigureComponent implements OnInit {
     this.dropdownsService.currentDriver.subscribe(passedValue => this.selectedDriver = passedValue);
     this.dropdownsService.currentLoop.subscribe(passedValue => {
       this.selectedLoop = passedValue;
-      this.getStopsFromDropdownService();});
+      this.dropdownsService.stops = [];});
     this.dropdownsService.currentBusDropdown.subscribe(passedValue => this.busDropdown = passedValue);
     this.dropdownsService.currentDriverDropdown.subscribe(passedValue => this.driverDropdown = passedValue);
     this.dropdownsService.currentLoopDropdown.subscribe(passedValue => this.loopsDropdown = passedValue);
 
     this.verifyDropDownsAreNotEmpty();
-
-    this.inspectionService.allItems = [];
-    this.inspectionService.preItems = [];
-    this.inspectionService.postItems = [];
-
-    
-
+if( this.inspectionService.allItems.length === 0){
     this.inspecService.getDBItems()
     .subscribe(
       (jsonData: Inspection) => {
@@ -122,7 +118,7 @@ export class ConfigureComponent implements OnInit {
         }
       }
     );
-
+    }
     this.dropdownsService.currentBusNumber.subscribe(passedValue => this.inspectionService.selectedBus = passedValue);
     this.dropdownsService.currentDriver.subscribe(passedValue => this.inspectionService.selectedDriver = passedValue);
     this.dropdownsService.currentLoop.subscribe(passedValue => this.inspectionService.selectedLoop = passedValue);
@@ -135,11 +131,12 @@ export class ConfigureComponent implements OnInit {
     if (this.selectedDriver.name === 'Select your Name' || this.selectedBus.name === 'Select a Bus'
       || this.selectedDriver.name === '' || this.selectedDriver.name === undefined || this.selectedDriver.name === null
       || this.selectedLoop.name === 'Select a loop' || this.selectedLoop.name === '' || this.selectedLoop.name === undefined
-      || this.selectedBus.name === '' || this.selectedBus.name === undefined || this.dropdownsService.stops.length === 0){
+      || this.selectedBus.name === '' || this.selectedBus.name === undefined){
       this.errorMessage = 'Oops! Select all choices above.';        
       this.errorMessageState = true;
     } else {
-      this.router.navigate(['/pre-inspection']);
+          this.getStops();
+          this.router.navigate(['/pre-inspection']);
     }
 
   }
@@ -161,6 +158,7 @@ export class ConfigureComponent implements OnInit {
     }).finally(() => {
       this.populateBusDropdown();
       this.populateDriversDropdown();
+      this.getAllStopsFromDropdownService();
       this.populateLoopsDropdown(); });
 }
 
@@ -168,11 +166,14 @@ export class ConfigureComponent implements OnInit {
     this.driverDropdown = [];
     this.busDropdown = [];
     this.loopsDropdown = [];
+    this.dropdownsService.allStops = [];
+    this.inspectionService.allItems = [];
     this.clearCacheByNameOrAll(true);
 
   }
 
   private populateBusDropdown(): void {
+    if (this.busDropdown.length === 0){
     this.busDropdownState = false;
     this.dropdownsService.getBusNumbers()
       .subscribe(
@@ -190,9 +191,11 @@ export class ConfigureComponent implements OnInit {
           this.showErrorMessage('Could not get buses. Please try refreshing the page.');
         }
       );
+    }
   }
 
   private populateDriversDropdown(): void {
+    if (this.driverDropdown.length === 0){
     this.driverDropdownState = false;
     this.dropdownsService.getDrivers()
       .subscribe(
@@ -209,9 +212,11 @@ export class ConfigureComponent implements OnInit {
           this.showErrorMessage('Could not get driver names. Please try refreshing the page.');
         }
       );
+    }
   }
 
   private populateLoopsDropdown(): void {
+    if (this.loopsDropdown.length === 0){
     this.loopDropdownState = false;
     this.dropdownsService.getAllLoops()
       .subscribe(
@@ -234,6 +239,7 @@ export class ConfigureComponent implements OnInit {
           this.showErrorMessage('Could not get loops. Please try refreshing the page.');
         }
       );
+    }
   }
 
   logout() {
@@ -255,6 +261,9 @@ export class ConfigureComponent implements OnInit {
     if (this.loopsDropdown[0] === undefined) {
       this.populateLoopsDropdown();
     }
+    if (this.dropdownsService.allStops[0] === undefined){
+      this.getAllStopsFromDropdownService();
+    }
 
     if (this.logService.logsToSend.length > 0) {
       this.logService.changeSyncMessage('syncStarted');
@@ -274,19 +283,25 @@ export class ConfigureComponent implements OnInit {
   private showErrorMessage(message: string): void {
     this.errorMessage = message;
   }
-
-  private getStopsFromDropdownService() {
-    this.dropdownsService.stops = [];
-    this.dropdownsService.getAllStops(this.selectedLoop.id)
-      .subscribe(
-        (data: Stop) => {
-          // this.stopDropdown.push(new Stop(null, 'Select a Stop'));
-          // tslint:disable-next-line:forin We know this already works.
-          for (const x in data.data) {
-            this.dropdownsService.stops.push(new Stop(data.data[x].id, data.data[x].stops));
-            console.log(this.dropdownsService.stops);
-          }
-       }
-      );
+  
+    private getAllStopsFromDropdownService() {
+      if (this.dropdownsService.allStops.length === 0){
+       this.dropdownsService.getEveryStops()
+        .subscribe(
+          (data: allStops) => {
+            // this.stopDropdown.push(new Stop(null, 'Select a Stop'));
+            // tslint:disable-next-line:forin We know this already works.
+            for (const x in data.data) {
+              this.dropdownsService.allStops.push(new allStops(data.data[x].id, data.data[x].stops, data.data[x].loop));
+              console.log(this.dropdownsService.allStops);
+            }
+         }
+        );
+      }
     }
+
+    private getStops(){
+      this.dropdownsService.stops = this.dropdownsService.allStops.filter(o => o.loop === this.selectedLoop.id).map(o => new Stop(o.id, o.name));
+      console.log(this.dropdownsService.stops);
+  }
 }

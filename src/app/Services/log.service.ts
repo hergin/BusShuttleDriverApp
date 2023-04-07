@@ -8,6 +8,7 @@ import { Stop } from '../Models/stop';
 import { Loop } from '../Models/loop';
 import { environment } from '../../environments/environment';
 import { ConnectionService } from './../Services/connection.service';
+import { InspectionLogService } from './inspection-log.service';
 
 @Injectable({
   providedIn: 'root'
@@ -26,7 +27,7 @@ export class LogService {
   private syncCountSource = new BehaviorSubject<number>(0);
   currentSyncCount = this.syncCountSource.asObservable();
 
-  constructor(private http: HttpClient, private connectionService: ConnectionService) {
+  constructor(private http: HttpClient, private connectionService: ConnectionService, public inspectionService: InspectionLogService) {
     const logs: Log[] = JSON.parse(localStorage.getItem('logs'));
     if (logs !== null) {
       this.logsToSend = logs;
@@ -83,6 +84,12 @@ export class LogService {
         this.changeSyncMessage('noInternet');
         this.isSyncing = false;
       } else {
+        for (let k = this.inspectionService.inspectionToSend.length - 1; k >= 0; k--){
+          this.inspectionService.store(this.inspectionService.inspectionToSend[k])
+                        .subscribe((success) => {   console.log("Sent Inspection")  
+          });
+        }
+        this.inspectionService.inspectionToSend = [];
         if (this.logsToSend.length > 0) {
           this.isSyncing = true;
           for (let i = this.logsToSend.length - 1; i >= 0; i--) {
