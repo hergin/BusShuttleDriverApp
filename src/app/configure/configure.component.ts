@@ -97,28 +97,6 @@ export class ConfigureComponent implements OnInit {
     this.dropdownsService.currentLoopDropdown.subscribe(passedValue => this.loopsDropdown = passedValue);
 
     this.verifyDropDownsAreNotEmpty();
-if( this.inspectionService.allItems.length === 0){
-    this.inspecService.getDBItems()
-    .subscribe(
-      (jsonData: Inspection) => {
-        // tslint:disable-next-line:forin We know this already works.
-        for (const x in jsonData.data) {
-          this.inspectionService.allItems.push(new Inspection( jsonData.data[x].id, jsonData.data[x].inspection_item_name,
-            jsonData.data[x].pre_trip_inspection, jsonData.data[x].post_trip_inspection));
-
-            if (jsonData.data[x].pre_trip_inspection === '1') {
-              this.inspectionService.preItems.push(new Inspection( jsonData.data[x].id, jsonData.data[x].inspection_item_name,
-                jsonData.data[x].pre_trip_inspection, jsonData.data[x].post_trip_inspection));
-            }
-
-            if (jsonData.data[x].post_trip_inspection === '1') {
-              this.inspectionService.postItems.push(new Inspection( jsonData.data[x].id, jsonData.data[x].inspection_item_name,
-                jsonData.data[x].pre_trip_inspection, jsonData.data[x].post_trip_inspection));
-            }
-        }
-      }
-    );
-    }
     this.dropdownsService.currentBusNumber.subscribe(passedValue => this.inspectionService.selectedBus = passedValue);
     this.dropdownsService.currentDriver.subscribe(passedValue => this.inspectionService.selectedDriver = passedValue);
     this.dropdownsService.currentLoop.subscribe(passedValue => this.inspectionService.selectedLoop = passedValue);
@@ -159,7 +137,8 @@ if( this.inspectionService.allItems.length === 0){
       this.populateBusDropdown();
       this.populateDriversDropdown();
       this.getAllStopsFromDropdownService();
-      this.populateLoopsDropdown(); });
+      this.populateLoopsDropdown();
+      this.populateInspectionItems(); });
 }
 
   refreshDropdowns() {
@@ -168,6 +147,8 @@ if( this.inspectionService.allItems.length === 0){
     this.loopsDropdown = [];
     this.dropdownsService.allStops = [];
     this.inspectionService.allItems = [];
+    this.inspectionService.preItems = [];
+    this.inspectionService.postItems = [];
     this.clearCacheByNameOrAll(true);
 
   }
@@ -242,6 +223,31 @@ if( this.inspectionService.allItems.length === 0){
     }
   }
 
+  private populateInspectionItems(): void {
+    if( this.inspectionService.allItems.length === 0){
+      this.inspecService.getDBItems()
+      .subscribe(
+        (jsonData: Inspection) => {
+          // tslint:disable-next-line:forin We know this already works.
+          for (const x in jsonData.data) {
+            this.inspectionService.allItems.push(new Inspection( jsonData.data[x].id, jsonData.data[x].inspection_item_name,
+              jsonData.data[x].pre_trip_inspection, jsonData.data[x].post_trip_inspection));
+  
+              if (jsonData.data[x].pre_trip_inspection === '1') {
+                this.inspectionService.preItems.push(new Inspection( jsonData.data[x].id, jsonData.data[x].inspection_item_name,
+                  jsonData.data[x].pre_trip_inspection, jsonData.data[x].post_trip_inspection));
+              }
+  
+              if (jsonData.data[x].post_trip_inspection === '1') {
+                this.inspectionService.postItems.push(new Inspection( jsonData.data[x].id, jsonData.data[x].inspection_item_name,
+                  jsonData.data[x].pre_trip_inspection, jsonData.data[x].post_trip_inspection));
+              }
+          }
+        }
+      );
+      }
+    }
+
   logout() {
     this.dropdownsService.changeBus(new Bus('0', 'Select a Bus'));
     this.dropdownsService.changeDriver(new User('0', 'Select your Name'));
@@ -263,6 +269,9 @@ if( this.inspectionService.allItems.length === 0){
     }
     if (this.dropdownsService.allStops[0] === undefined){
       this.getAllStopsFromDropdownService();
+    }
+    if(this.inspectionService.allItems.length === 0){
+      this.populateInspectionItems();
     }
 
     if (this.logService.logsToSend.length > 0) {
