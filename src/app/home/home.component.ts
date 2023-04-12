@@ -198,12 +198,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.showSuccessMessage(this.stopName);
     
     // check for the success message to disapper then try to either submit data directly or put it in the local storage.
-    this.timerId = setInterval(() => this.subscribe(copy), 1000);
-    setTimeout(() => clearInterval(this.timerId), 12000);
+    // this.timerId = setInterval(() => this.subscribe(copy), 1000);
+    // setTimeout(() => clearInterval(this.timerId), 12000);
   }
 
   private subscribe (copy: Log): void{
-    if (!this.successMessageState) {
       if (!this.cancelClicked) {
 
         // Try to either submit data directly or put it in the local storage.
@@ -232,9 +231,6 @@ export class HomeComponent implements OnInit, OnDestroy {
           });
         clearInterval(this.timerId);
        }
-
-    }
-
   }
 
   private validateForm(form: NgForm): boolean {
@@ -316,12 +312,17 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.successMessageState = true;
     this.successSubscription = this.successTimer.subscribe(() => {
     this.successMessageState = false;
+    const copy = { ...this.log }; // Creating a copy of the member 'log'
+    this.subscribe(copy);
     });
   }
 
   closeSuccessMessage(): void {
     this.successMessageState = false;
     this.cancelClicked = false;
+    const copy = { ...this.log }; // Creating a copy of the member 'log'
+    this.subscribe(copy);
+    this.successSubscription.unsubscribe();
   }
 
 
@@ -348,6 +349,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   cancelSuccessMessage(): void {
     this.successMessageState = false;
+    this.successSubscription.unsubscribe();
     this.cancelClicked = true;
   }
 
