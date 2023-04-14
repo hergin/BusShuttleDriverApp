@@ -87,6 +87,10 @@ export class PostInspectionComponent implements OnInit {
             this.inspectionService.inspectionLog.endingMileage = this.endMileage;
             this.inspectionService.inspectionLog.endingHours = this.inspectionService.getTimeStamp();
             this.inspectionService.inspectionLog.postInspectionComment = this.postComment;
+            var preInspections = this.inspectionService.preItems.map(p=>p.name).join(",");
+            this.inspectionService.inspectionLog.preInspection = preInspections;
+            var postInspections = this.inspectionService.postItems.map(p=>p.name).join(",");
+            this.inspectionService.inspectionLog.postInspection = postInspections;
             let copy = JSON.parse(JSON.stringify(this.inspectionService.inspectionLog));
             this.inspectionService.storeLogsLocally(copy);
             if (this.onlineOffline){
