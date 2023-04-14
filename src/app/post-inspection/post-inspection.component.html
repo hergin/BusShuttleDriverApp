@@ -28,16 +28,6 @@
         </h4>
        </div>
 
-       <div class="form-group">
-        <input type="text"  id="name"  required="true" inputmode="numeric" (keyup)="onHourKey($event)" >
-        <label for="name" placeholder="Ending Hours*" ></label>
-    </div>
-    <div class="alert alert-danger text-center" [@simpleFadeAnimation]="'in'" *ngIf="errorMessageStateHours">
-        <h4>
-            Please enter a valid number
-        </h4>
-    </div>
-
     <div class="form-group">
             <input type="text"  id="name"  required="true" inputmode="text" (keyup)="onCommentKey($event)" >
             <label for="name" placeholder="List any damage or non-working items" ></label>

@@ -30,18 +30,13 @@ export class PostInspectionComponent implements OnInit {
   allItems = [];
   postItems = [];
   endMileage = '';
-  endingHours = '';
   strItem = '';
   postComment = '';
-
   status = '';
   public onlineOffline: boolean = navigator.onLine;
   errMessage = 'Oops! There is no internet connection.';
-
   checkMileage;
-  checkHours;
   errorMessageState = false;
-  errorMessageStateHours = false;
 
   constructor(
     private inspecService: InspectionService,
@@ -65,7 +60,7 @@ export class PostInspectionComponent implements OnInit {
   }
 
   buttonState() {
-    return !((this.postItems.every(_ => _.state)) && (this.endMileage !== '') && (this.endingHours !== '') );
+    return !((this.postItems.every(_ => _.state)) && (this.endMileage !== '') );
   }
 
   onKey(event: any) { // without type info
@@ -77,32 +72,20 @@ export class PostInspectionComponent implements OnInit {
      }
   }
 
-  onHourKey(event: any) { // without type info
-    this.endingHours = event.target.value;
-    if (this.validateHours()) {
-      this.errorMessageStateHours = true;
-    } else {
-      this.errorMessageStateHours = false;
-     }
- }
-
  onCommentKey(event: any) { // without type info
   this.postComment = event.target.value;
 
 }
 
   submitLog(): void {
-        if (this.validateMileage() || this.validateHours() ) {
+        if (this.validateMileage()) {
           if (this.validateMileage()) {
             this.errorMessageState = true;
-          }
-          if (this.validateHours()) {
-            this.errorMessageStateHours = true;
           }
         } else {
 
             this.inspectionService.inspectionLog.endingMileage = this.endMileage;
-            this.inspectionService.inspectionLog.endingHours = this.endingHours;
+            this.inspectionService.inspectionLog.endingHours = this.inspectionService.getTimeStamp();
             this.inspectionService.inspectionLog.postInspectionComment = this.postComment;
             let copy = JSON.parse(JSON.stringify(this.inspectionService.inspectionLog));
             this.inspectionService.storeLogsLocally(copy);
@@ -123,13 +106,6 @@ export class PostInspectionComponent implements OnInit {
     this.checkMileage = Number(this.endMileage);
     return isNaN(this.checkMileage);
   }
-
-  validateHours(): boolean {
-    this.checkHours = Number(this.endingHours);
-    return isNaN(this.checkHours);
-  }
-
-
 
   createString() {
     for (let i = 0 ;  i < this.postItems.length ; i++) {

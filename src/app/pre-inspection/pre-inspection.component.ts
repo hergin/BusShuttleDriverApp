@@ -24,16 +24,13 @@ export class PreInspectionComponent implements OnInit {
   preItems = [];
   strItem = '';
   startMileage = '';
-  startHours = '';
   preComment = '';
   checkMileage;
-  checkHours;
   selectedBus: Bus;
   selectedDriver: User;
   selectedLoop: Loop;
-
   errorMessageState = false;
-  errorMessageStateHours = false;
+
 
 
   constructor(
@@ -50,7 +47,7 @@ export class PreInspectionComponent implements OnInit {
     }
 
   buttonState() {
-    return !((this.preItems.every(_ => _.state)) && (this.startMileage !== '') && (this.startHours !== '') );
+    return !((this.preItems.every(_ => _.state)) && (this.startMileage !== '') );
   }
 
   onKey(event: any) { // without type info
@@ -61,15 +58,6 @@ export class PreInspectionComponent implements OnInit {
       this.errorMessageState = false;
      }
 
-  }
-
-  onHourKey(event: any) { // without type info
-     this.startHours = event.target.value;
-     if (this.validateHours()) {
-       this.errorMessageStateHours = true;
-     } else {
-       this.errorMessageStateHours = false;
-      }
   }
 
   onCommentKey(event: any) { // without type info
@@ -89,12 +77,9 @@ export class PreInspectionComponent implements OnInit {
     }
 
     submitLog(): void {
-      if (this.validateMileage() || this.validateHours() ) {
+      if (this.validateMileage()) {
           if (this.validateMileage()) {
             this.errorMessageState = true;
-          }
-          if (this.validateHours()) {
-            this.errorMessageStateHours = true;
           }
       } else {
           this.inspectionService.inspectionLog.timestamp = this.inspectionService.getTimeStamp();
@@ -103,7 +88,7 @@ export class PreInspectionComponent implements OnInit {
           this.inspectionService.inspectionLog.busNumber = this.inspectionService.selectedBus.id;
           this.inspectionService.inspectionLog.loop = this.inspectionService.selectedLoop.id;
           this.inspectionService.inspectionLog.startingMileage = this.startMileage;
-          this.inspectionService.inspectionLog.beginningHours = this.startHours;
+          this.inspectionService.inspectionLog.beginningHours = this.inspectionService.getHourStamp();
           this.inspectionService.inspectionLog.preInspectionComment = this.preComment;
 
           this.router.navigate(['/form']);
@@ -115,13 +100,6 @@ export class PreInspectionComponent implements OnInit {
     this.checkMileage = Number(this.startMileage);
     return isNaN(this.checkMileage);
   }
-
-  validateHours(): boolean {
-    this.checkHours = Number(this.startHours);
-    return isNaN(this.checkHours);
-  }
-
-
 
   createString() {
     for (let i = 0 ;  i < this.preItems.length ; i++) {
